@@ -1,3 +1,3 @@
 # M5Paper_TextView
 
-M5Paper 用テキストビューワ　（製作中）
+M5Paper用テキストビューワ（製作中）
