@@ -39,17 +39,27 @@ void setup() {
 }
 
 String set_string(){
-  String buf = u8"祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
-  return buf;
+
+  //String buf = u8"祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
+
+    String buf;
+
+    //ファイルの中身を 一 文 字 ず つ 読み取る
+    File file;
+    //file = SD.open("/doc.txt",FILE_READ);
+    file = SD.open("/doc2.txt",FILE_READ);
+    while(file.available()){
+      buf.concat(file.readString());
+    }
+    Serial.println(buf);
+
+    return buf;
+
 }
 
 void loop() {
 
   String buf;
-//  char cBuf[256];
-
-//  char s[] = u8"あいうえお"; 
-
 
   canvas.createCanvas(540, 960);
 
@@ -58,11 +68,14 @@ void loop() {
 
 
   //int lx = 540-64;
-  int lx = 480-32;
-  int ly = 32;
+  int lx = 500;
+  int lst = 16;
+  int ly = lst;
+  
 
   int pt = 32;
   int wc = 3;
+  long cnt = 0;
 
   canvas.setTextSize(pt);
   buf = set_string();
@@ -71,82 +84,33 @@ void loop() {
   int l =buf.length();
   Serial.println(l);
 
+Serial.print("CR:");
+Serial.println( '\r', HEX);
+Serial.print("LF:");
+Serial.println( '\n', HEX);
+
+
 //  Serial.println(buf.charAt(1)); 
 
   for(int i=0;i<l;i+=wc){
+    cnt+=1;
+    if(cnt>30){
+      cnt=0;
+      lx -= pt;
+      ly=lst;
+    }
+    if(buf.charAt(i)==13){  // CR だったら？　（Windows系の CR/LFの頭のコード(0Dh)を見ているのみ。）MacならLF（0Ah)を見るべき
+      i+=2;   // Windows系のCR/LFの2バイトをジャンプ -> Macならここは ＋１で。
+      cnt=0;
+      lx -= pt;
+      ly=lst;
+    }
+
     Serial.println(buf.substring(i, i+wc));
     canvas.drawString(buf.substring(i, i+wc), lx, ly);
     ly += pt;
   }
 
-
-//  Serial.println(buf.substring(0, 3));
-//  Serial.println(buf.substring(3, 6));
-
-//  strcpy(cBuf,buf.c_str());
-//  Serial.println( cBuf );
-
-
-/*
-  size_t byte_size = sizeof(buf);
-  Serial.println( byte_size );
-
-  byte_size = sizeof(cBuf);
-  Serial.println( byte_size );
-*/
-
-
-
-  //canvas.drawString(buf,10, 32, true);
-
-
-/*
-  buf = "祗園精舎の鐘の声、";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "諸行無常の響きあり。";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "娑羅双樹の花の色、";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "盛者必衰の理をあらはす。";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "おごれる人も久しからず、";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "唯春の夜の夢のごとし。";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "たけき者も遂にはほろびぬ、";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-
-  buf = "偏に風の前の塵に同じ。";
-  canvas.drawString(buf, lx, 32, true);
-  lx -= pt;
-*/
-  
-
-/* 
-
-canvas.print("祗園精舎の鐘の声、");
-canvas.print("諸行無常の響きあり。");
-canvas.print("娑羅双樹の花の色、");
-canvas.print("盛者必衰の理をあらはす。");
-canvas.println("");
-canvas.print("おごれる人も久しからず、");
-canvas.print("唯春の夜の夢のごとし。");
-canvas.print("たけき者も遂にはほろびぬ、");
-canvas.print("偏に風の前の塵に同じ。");
-*/
 
   canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
 
