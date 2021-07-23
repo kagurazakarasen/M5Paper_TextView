@@ -2,6 +2,7 @@
 #include <FS.h>
 
 #include <WString.h> 
+#include <string>
 
 #include <locale.h>
 
@@ -38,13 +39,17 @@ void setup() {
 }
 
 String set_string(){
-  String buf = "祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
+  String buf = u8"祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
   return buf;
 }
 
 void loop() {
 
   String buf;
+//  char cBuf[256];
+
+//  char s[] = u8"あいうえお"; 
+
 
   canvas.createCanvas(540, 960);
 
@@ -52,19 +57,47 @@ void loop() {
   canvas.fillCanvas(0);
 
 
-  int lx = 540-64;
+  //int lx = 540-64;
+  int lx = 480-32;
+  int ly = 32;
 
   int pt = 32;
+  int wc = 3;
 
   canvas.setTextSize(pt);
   buf = set_string();
-  Serial.println(buf.c_str());
+  Serial.println(buf);
 
-  Serial.println(buf.length());
+  int l =buf.length();
+  Serial.println(l);
 
-  Serial.println(buf.charAt(1)); 
+//  Serial.println(buf.charAt(1)); 
 
-  canvas.drawString(buf,10, 32, true);
+  for(int i=0;i<l;i+=wc){
+    Serial.println(buf.substring(i, i+wc));
+    canvas.drawString(buf.substring(i, i+wc), lx, ly);
+    ly += pt;
+  }
+
+
+//  Serial.println(buf.substring(0, 3));
+//  Serial.println(buf.substring(3, 6));
+
+//  strcpy(cBuf,buf.c_str());
+//  Serial.println( cBuf );
+
+
+/*
+  size_t byte_size = sizeof(buf);
+  Serial.println( byte_size );
+
+  byte_size = sizeof(cBuf);
+  Serial.println( byte_size );
+*/
+
+
+
+  //canvas.drawString(buf,10, 32, true);
 
 
 /*
