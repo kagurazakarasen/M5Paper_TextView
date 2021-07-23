@@ -1,10 +1,9 @@
 #include <M5EPD.h>
 #include <FS.h>
 
-#include <WString.h> 
-#include <string>
-
-#include <locale.h>
+// #include <WString.h> 
+// #include <string>
+// #include <locale.h>
 
 #define DocTextFile "/doc3.txt"   // 読み込みテキストファイル（UTF-8）
 
@@ -12,7 +11,7 @@
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
-  setlocale(LC_CTYPE, "ja_JP.UTF-8");
+  //setlocale(LC_CTYPE, "ja_JP.UTF-8");
   M5.begin();
   M5.TP.SetRotation(90);
   M5.EPD.SetRotation(90);
@@ -97,7 +96,7 @@ Serial.println( '\n', HEX);
 
   for(int i=0;i<l;i+=wc){
     cnt+=1;
-    if( cnt > (960/pt)-1){
+    if( cnt > (960/pt)-1){  // 縦サイズ/文字サイズ -1 (1文字分少なく) を超えていたら改行
       cnt=0;
       lx -=(pt+gyoukan);
       ly=lst;
