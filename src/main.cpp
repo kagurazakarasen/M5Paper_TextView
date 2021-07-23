@@ -1,9 +1,14 @@
 #include <M5EPD.h>
 #include <FS.h>
 
+#include <WString.h> 
+
+#include <locale.h>
+
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
+  setlocale(LC_CTYPE, "ja_JP.UTF-8");
   M5.begin();
   M5.TP.SetRotation(90);
   M5.EPD.SetRotation(90);
@@ -32,6 +37,11 @@ void setup() {
   M5.EPD.Clear(true);
 }
 
+String set_string(){
+  String buf = "祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
+  return buf;
+}
+
 void loop() {
 
   String buf;
@@ -47,7 +57,17 @@ void loop() {
   int pt = 32;
 
   canvas.setTextSize(pt);
+  buf = set_string();
+  Serial.println(buf.c_str());
 
+  Serial.println(buf.length());
+
+  Serial.println(buf.charAt(1)); 
+
+  canvas.drawString(buf,10, 32, true);
+
+
+/*
   buf = "祗園精舎の鐘の声、";
   canvas.drawString(buf, lx, 32, true);
   lx -= pt;
@@ -79,7 +99,7 @@ void loop() {
   buf = "偏に風の前の塵に同じ。";
   canvas.drawString(buf, lx, 32, true);
   lx -= pt;
-
+*/
   
 
 /* 
