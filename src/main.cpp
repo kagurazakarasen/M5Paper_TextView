@@ -6,6 +6,9 @@
 
 #include <locale.h>
 
+#define DocTextFile "/doc3.txt"   // 読み込みテキストファイル（UTF-8）
+
+
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
@@ -47,7 +50,7 @@ String set_string(){
     //ファイルの中身を 一 文 字 ず つ 読み取る
     File file;
     //file = SD.open("/doc.txt",FILE_READ);
-    file = SD.open("/doc2.txt",FILE_READ);
+    file = SD.open(DocTextFile, FILE_READ);
     while(file.available()){
       buf.concat(file.readString());
     }
@@ -68,11 +71,11 @@ void loop() {
 
 
   //int lx = 540-64;
-  int lx = 500;
-  int lst = 16;
+  int lx = 540-32;
+  int lst = 0;
   int ly = lst;
   
-
+  int gyoukan = 8;
   int pt = 32;
   int wc = 3;
   long cnt = 0;
@@ -94,26 +97,34 @@ Serial.println( '\n', HEX);
 
   for(int i=0;i<l;i+=wc){
     cnt+=1;
-    if(cnt>30){
+    if( cnt > (960/pt)-1){
       cnt=0;
-      lx -= pt;
+      lx -=(pt+gyoukan);
       ly=lst;
     }
     if(buf.charAt(i)==13){  // CR だったら？　（Windows系の CR/LFの頭のコード(0Dh)を見ているのみ。）MacならLF（0Ah)を見るべき
       i+=2;   // Windows系のCR/LFの2バイトをジャンプ -> Macならここは ＋１で。
       cnt=0;
-      lx -= pt;
+      lx -= (pt+gyoukan);
       ly=lst;
     }
 
-    Serial.println(buf.substring(i, i+wc));
+    Serial.print(buf.substring(i, i+wc));
+    /*  // 。や、の処理をしてみたけれど、隣り合うフォントが欠けてしまうので今は取りやめ
+    if(buf.substring(i, i+wc).equals("。")){
+        canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
+    } else {
+        canvas.drawString(buf.substring(i, i+wc), lx, ly);
+    }
+    */
     canvas.drawString(buf.substring(i, i+wc), lx, ly);
+
     ly += pt;
   }
 
 
   canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
 
-  delay(50000);
+   while(1) {}   // 無限ループ
   
 }
