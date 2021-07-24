@@ -9,6 +9,8 @@
   int pt = 32;
   int wc = 3;
 
+  int lst = 0;          // 最上部の空き
+
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
@@ -40,6 +42,108 @@ void setup() {
 
   M5.EPD.Clear(true);
 }
+
+
+long read_and_viewpage(long pp){
+  //ファイルポインタpp以降を1ページ分よみこみ、同時に表示。戻り値はページ最後のポインタ
+
+    String buf="";
+    long fpn=0; // 読み込みバイト数ポインタ
+    //ファイルの中身を 一 文 字 ず つ 読み取る
+    File file;
+ 
+    file = SD.open(DocTextFile, FILE_READ);
+ 
+    file.seek(pp);    // シークポイント
+
+   Serial.print("SD FileRead: "); Serial.println(DocTextFile);
+   Serial.print("Start Point: "); Serial.println(pp);
+
+    int lx = 540-32;  // view用ｘ
+    int ly = lst;         // view y (lst=初期値)
+
+    long lcnt = 0;  // LineCount
+
+    canvas.setTextSize(pt);   // Font Size
+
+
+   if(file){
+       int i=0;
+       while (file.available()) {
+           buf += char(file.read());
+           fpn += 1;
+           lcnt += 1;
+           if(i==0){
+
+                if( lcnt > (960/pt)-1){  // 縦サイズ/文字サイズ -1 (1文字分少なく) を超えていたら改行
+                  lcnt=0;
+                  lx -=(pt+gyoukan);
+                  ly=lst;
+                }
+                if(buf.charAt(i)==13){  // CR だったら？　（Windows系の CR/LFの頭のコード(0Dh)を見ているのみ。）MacならLF（0Ah)を見るべき
+                  i+=2;   // Windows系のCR/LFの2バイトをジャンプ -> Macならここは ＋１で。
+                  lcnt=0;
+                  lx -= (pt+gyoukan);
+                  ly=lst;
+                }
+
+              //1バイトなら？
+                  if(buf.charAt(i)>8 and buf.charAt(i)<128){
+                    canvas.drawChar(buf.charAt(i), lx, ly);
+                    Serial.print(buf.charAt(i));
+                    //i+=1;
+                    i -= 2 ;   // 3バイト幅なので、次ループ用に2バイト戻しておく
+                    //wc=1;
+                  } else if (buf.charAt(i)<8) {  
+                    // 2バイトなら。。（未テスト）
+                      canvas.drawString(buf.substring(i, i+2), lx, ly);
+                      Serial.print(buf.substring(i, i+2));
+                      i -= 1 ;     // 3バイト幅なので、次ループ用に1バイト戻しておく
+                      break;
+                  } else  {
+                      // ここに来るのは3バイト
+                      Serial.print(buf.substring(i, i+wc));
+
+                      // 。や、の処理。無理やり描画
+                      if(buf.substring(i, i+wc).equals("。")){
+                        canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
+                      } else if (buf.substring(i, i+wc).equals("、")){
+                        canvas.drawLine(lx+(pt/1.2), ly+(pt/4),lx+(pt/1.2)+4, ly+(pt/4)+4, 4, 15);
+                      }  else if (buf.substring(i, i+wc).equals("ー")){
+                        canvas.drawLine(lx+(pt/2), ly+(pt/4),lx+(pt/2), ly+(pt-(pt/4)), 3, 15);
+                      } else {
+                          canvas.drawString(buf.substring(i, i+wc), lx, ly);
+                      }
+
+                  }
+
+                  
+                  ly += pt;
+
+
+
+
+           }
+
+
+
+           if(fpn> ((960/pt)*(540/pt)*wc))  break;    // 1ページ以上取れたら
+      }
+       Serial.println(fpn);
+       Serial.println(buf);
+   } else{Serial.println(F(" error..."));}
+   file.close();
+
+  
+}
+
+
+
+
+
+
+
+
 
 String set_string(long pp){
 
