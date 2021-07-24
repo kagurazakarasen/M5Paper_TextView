@@ -7,6 +7,9 @@
 
 #define DocTextFile "/doc3.txt"   // 読み込みテキストファイル（UTF-8）
 
+  int gyoukan = 8;
+  int pt = 32;
+  int wc = 3;
 
 M5EPD_Canvas canvas(&M5.EPD);
 
@@ -40,20 +43,31 @@ void setup() {
   M5.EPD.Clear(true);
 }
 
-String set_string(){
+String set_string(long pp){
 
   //String buf = u8"祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
 
     String buf;
-
+    long fpn=0; // 読み込みバイト数ポインタ
     //ファイルの中身を 一 文 字 ず つ 読み取る
     File file;
     //file = SD.open("/doc.txt",FILE_READ);
     file = SD.open(DocTextFile, FILE_READ);
-    while(file.available()){
-      buf.concat(file.readString());
-    }
-    Serial.println(buf);
+    file.seek(pp);    // シークポイント
+
+   Serial.print(F("SD FileRead: ")); Serial.print(DocTextFile);
+   if(file){
+       while (file.available()) {
+           buf += char(file.read());
+           fpn += 1;
+           if(fpn> ((960/pt)*(540/pt)*wc))  break;    // 1ページ以上取れたら
+      }
+       Serial.println(fpn);
+       Serial.println(buf);
+   } else{Serial.println(F(" error..."));}
+   file.close();
+
+  //  Serial.println(buf);
 
     return buf;
 
@@ -74,13 +88,11 @@ void loop() {
   int lst = 0;
   int ly = lst;
   
-  int gyoukan = 8;
-  int pt = 32;
-  int wc = 3;
+
   long cnt = 0;
 
   canvas.setTextSize(pt);
-  buf = set_string();
+  buf = set_string(0);
   Serial.println(buf);
 
   int l =buf.length();
