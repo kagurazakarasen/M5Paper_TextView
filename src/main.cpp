@@ -5,9 +5,16 @@
 #define TtfFile "/font.ttf"   // フォントファイル（UTF-8）
 
 
-  int gyoukan = 8;
-  int pt = 32;
-  int wc = 3;
+int gyoukan = 8;    // 行間
+int pt = 32;            //  フォントサイズ：ポイント
+int wc = 3;             // UTF-8の基本ワードバイト数
+
+  int lst = 0;          // ページ上部空き
+
+
+long NextPagePoint=0; // 次のページ先頭ファイルポインタ
+long PrevPagePoint=0; // 前のページ先頭ファイルポインタ
+
 
 M5EPD_Canvas canvas(&M5.EPD);
 
@@ -35,10 +42,21 @@ void setup() {
   //canvas.createRender(96, 256);
   canvas.createRender(32, 256);
 
+  canvas.setTextSize(pt); //フォントサイズ指定
+
   canvas.drawString("OK!", 270, 254);
   canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
 
   M5.EPD.Clear(true);
+
+    canvas.createCanvas(540, 960);
+
+  canvas.setTextDatum(TL_DATUM);
+  canvas.fillCanvas(0);
+
+  canvas.setTextSize(pt); //フォントサイズ指定
+
+
 }
 
 String set_string(long pp){
@@ -49,7 +67,6 @@ String set_string(long pp){
     long fpn=0; // 読み込みバイト数ポインタ
     //ファイルの中身を 一 文 字 ず つ 読み取る
     File file;
-    //file = SD.open("/doc.txt",FILE_READ);
     file = SD.open(DocTextFile, FILE_READ);
     file.seek(pp);    // シークポイント
 
@@ -71,51 +88,51 @@ String set_string(long pp){
 
 }
 
-void loop() {
-
-  String buf;
-
-  canvas.createCanvas(540, 960);
-
-  canvas.setTextDatum(TL_DATUM);
-  canvas.fillCanvas(0);
-
+int pageView(String buf){
+  //String buf;
 
   //int lx = 540-64;
   int lx = 540-32;
-  int lst = 0;
   int ly = lst;
+
+  long cnt = 0; //ページ内文字カウント
   
-
-  long cnt = 0;
-
-  canvas.setTextSize(pt);
-  buf = set_string(0);
-  Serial.println(buf);
-
   int l =buf.length();
   Serial.println(l);
 
+/*
 Serial.print("CR:");
 Serial.println( '\r', HEX);
 Serial.print("LF:");
 Serial.println( '\n', HEX);
-
+*/
 
 //  Serial.println(buf.charAt(1)); 
-  for(int i=0;i<l;i+=wc){
+int i;
+  for(i=0;i<l;i+=wc){
      cnt+=1;
     // 改行処理
-    if( cnt > (960/pt)-1){  // 縦サイズ/文字サイズ -1 (1文字分少なく) を超えていたら改行
+    bool ret_on=false;
+    if( cnt > (960/pt)-1)  {  // 縦サイズ/文字サイズ -1 (1文字分少なく) を超えていたら改行
       cnt=0;
       lx -=(pt+gyoukan);
       ly=lst;
+      ret_on=true;
     }
     if(buf.charAt(i)==13){  // CR だったら？　（Windows系の CR/LFの頭のコード(0Dh)を見ているのみ。）MacならLF（0Ah)を見るべき
       i+=2;   // Windows系のCR/LFの2バイトをジャンプ -> Macならここは ＋１で。
       cnt=0;
       lx -= (pt+gyoukan);
       ly=lst;
+      ret_on=true;
+    }
+    if(ret_on==true){ //改行あり。ページ末チェック
+      if(lx<pt/2){  // 最新のlx が文字幅以下なら？
+        Serial.print(":PEnd(i)：");Serial.println(i);
+        Serial.print("次文字：");
+        Serial.println(buf.substring(i, i+3));
+        break;
+      }
     }
 
     //1バイトなら？
@@ -133,7 +150,7 @@ Serial.println( '\n', HEX);
         break;
     } else  {
         // ここに来るのは3バイト
-        Serial.print(buf.substring(i, i+wc));
+        //Serial.print(buf.substring(i, i+wc));
 
         // 。や、の処理。無理やり描画
         if(buf.substring(i, i+wc).equals("。")){
@@ -157,6 +174,50 @@ Serial.println( '\n', HEX);
  // canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
   canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
 
-   while(1) {}   // 無限ループ
+  return(i);
+
+}
+
+
+void loop() {
+
+   String buf;
+  long pos=0;
+
+
+  buf = set_string(pos);
+  Serial.println(buf);
+
+  NextPagePoint = pageView(buf);
+  Serial.println(NextPagePoint);
+  
+
+   while(1) {
+
+    if( M5.BtnL.wasPressed()) { // Backは1度のみに・・Prevは配列にするしかないか・・・？
+        Serial.println("Btn L Pressed");
+       
+
+    }
+
+    if( M5.BtnP.wasPressed()){
+        Serial.println("Btn P Pressed");
+
+    }
+
+    if( M5.BtnR.wasPressed())
+    {
+        Serial.println("Btn R Pressed");
+        Serial.println("NextPage!");
+        canvas.fillCanvas(0);
+        PrevPagePoint=NextPagePoint;
+        buf = set_string(NextPagePoint);
+        NextPagePoint += pageView(buf);
+        Serial.println(NextPagePoint);
+    }
+    M5.update();
+    delay(100);
+
+   }   // 無限ループ
   
 }
