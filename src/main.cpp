@@ -1,11 +1,9 @@
 #include <M5EPD.h>
 #include <FS.h>
 
-// #include <WString.h> 
-// #include <string>
-// #include <locale.h>
-
 #define DocTextFile "/doc3.txt"   // 読み込みテキストファイル（UTF-8）
+#define TtfFile "/font.ttf"   // フォントファイル（UTF-8）
+
 
   int gyoukan = 8;
   int pt = 32;
@@ -14,7 +12,6 @@
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
-  //setlocale(LC_CTYPE, "ja_JP.UTF-8");
   M5.begin();
   M5.TP.SetRotation(90);
   M5.EPD.SetRotation(90);
@@ -32,9 +29,10 @@ void setup() {
   canvas.drawString("Loading font ...", 270, 230);
   canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
   Serial.println("Loading font from SD.");
-  canvas.loadFont("/font.ttf", SD);
+  canvas.loadFont(TtfFile,  SD);
+  
   Serial.println("Loading done.");
-  canvas.createRender(96, 256);
+  //canvas.createRender(96, 256);
   canvas.createRender(32, 256);
 
   canvas.drawString("OK!", 270, 254);
@@ -156,7 +154,8 @@ Serial.println( '\n', HEX);
   }
 
 
-  canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
+ // canvas.pushCanvas(0,0,UPDATE_MODE_DU4);
+  canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
 
    while(1) {}   // 無限ループ
   
