@@ -109,14 +109,27 @@ Serial.println( '\n', HEX);
     }
 
     Serial.print(buf.substring(i, i+wc));
-    /*  // 。や、の処理をしてみたけれど、隣り合うフォントが欠けてしまうので今は取りやめ
+
+     // 。や、の処理。うまくいかない＞＜
     if(buf.substring(i, i+wc).equals("。")){
-        canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
+      //canvas.pushCanvas(0,0,UPDATE_MODE_DU4); // いったんいままでのをPush
+      //canvas.createCanvas(pt, pt);
+      //M5.EPD.SetRotation(0); //普通は90   // ローテーションチェンジはうまくいかず＞＜
+      //M5.EPD.Clear(true);
+      //canvas.drawString(buf.substring(i, i+wc), 16,-16); // 新しいCanvasの０、０にセット
+      //canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
+
+      //canvas.pushCanvas(0,0,UPDATE_MODE_A2); // 一文字だけPush
+       canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
+      //canvas.createCanvas(540, 960); // また全体Canvas作成
+      //M5.EPD.SetRotation(90); //普通は90
+      //break;
+        //canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
     } else {
         canvas.drawString(buf.substring(i, i+wc), lx, ly);
     }
-    */
-    canvas.drawString(buf.substring(i, i+wc), lx, ly);
+    
+   // canvas.drawString(buf.substring(i, i+wc), lx, ly);
 
     ly += pt;
   }
