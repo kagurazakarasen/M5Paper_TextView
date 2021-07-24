@@ -93,9 +93,9 @@ Serial.println( '\n', HEX);
 
 
 //  Serial.println(buf.charAt(1)); 
-
   for(int i=0;i<l;i+=wc){
-    cnt+=1;
+     cnt+=1;
+    // 改行処理
     if( cnt > (960/pt)-1){  // 縦サイズ/文字サイズ -1 (1文字分少なく) を超えていたら改行
       cnt=0;
       lx -=(pt+gyoukan);
@@ -108,30 +108,39 @@ Serial.println( '\n', HEX);
       ly=lst;
     }
 
-    Serial.print(buf.substring(i, i+wc));
+    //1バイトなら？
+    if(buf.charAt(i)>8 and buf.charAt(i)<128){
+      canvas.drawChar(buf.charAt(i), lx, ly);
+      Serial.print(buf.charAt(i));
+       //i+=1;
+       i -= 2 ;   // 3バイト幅なので、次ループ用に2バイト戻しておく
+      //wc=1;
+    } else if (buf.charAt(i)<8) {  
+      // 2バイトなら。。（未テスト）
+        canvas.drawString(buf.substring(i, i+2), lx, ly);
+        Serial.print(buf.substring(i, i+2));
+        i -= 1 ;     // 3バイト幅なので、次ループ用に1バイト戻しておく
+        break;
+    } else  {
+        // ここに来るのは3バイト
+        Serial.print(buf.substring(i, i+wc));
 
-     // 。や、の処理。うまくいかない＞＜
-    if(buf.substring(i, i+wc).equals("。")){
-      //canvas.pushCanvas(0,0,UPDATE_MODE_DU4); // いったんいままでのをPush
-      //canvas.createCanvas(pt, pt);
-      //M5.EPD.SetRotation(0); //普通は90   // ローテーションチェンジはうまくいかず＞＜
-      //M5.EPD.Clear(true);
-      //canvas.drawString(buf.substring(i, i+wc), 16,-16); // 新しいCanvasの０、０にセット
-      //canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
+        // 。や、の処理。無理やり描画
+        if(buf.substring(i, i+wc).equals("。")){
+          canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
+        } else if (buf.substring(i, i+wc).equals("、")){
+          canvas.drawLine(lx+(pt/1.2), ly+(pt/4),lx+(pt/1.2)+4, ly+(pt/4)+4, 4, 15);
+        }  else if (buf.substring(i, i+wc).equals("ー")){
+          canvas.drawLine(lx+(pt/2), ly+(pt/4),lx+(pt/2), ly+(pt-(pt/4)), 3, 15);
+        } else {
+            canvas.drawString(buf.substring(i, i+wc), lx, ly);
+        }
 
-      //canvas.pushCanvas(0,0,UPDATE_MODE_A2); // 一文字だけPush
-       canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
-      //canvas.createCanvas(540, 960); // また全体Canvas作成
-      //M5.EPD.SetRotation(90); //普通は90
-      //break;
-        //canvas.drawString(buf.substring(i, i+wc), lx+(pt/2), ly-(pt/2));
-    } else {
-        canvas.drawString(buf.substring(i, i+wc), lx, ly);
     }
-    
-   // canvas.drawString(buf.substring(i, i+wc), lx, ly);
 
+    
     ly += pt;
+  
   }
 
 
