@@ -1,7 +1,7 @@
 #include <M5EPD.h>
 #include <FS.h>
 
-#define DocTextFile "/doc3.txt"   // 読み込みテキストファイル（UTF-8）
+#define DocTextFile "/doc2.txt"   // 読み込みテキストファイル（UTF-8）
 #define TtfFile "/font.ttf"   // フォントファイル（UTF-8）
 
 
@@ -10,10 +10,6 @@ int pt = 32;            //  フォントサイズ：ポイント
 int wc = 3;             // UTF-8の基本ワードバイト数
 
   int lst = 0;          // ページ上部空き
-
-
-//long NextPagePoint=0; // 次のページ先頭ファイルポインタ
-//long PrevPagePoint=0; // 前のページ先頭ファイルポインタ
 
 
 M5EPD_Canvas canvas(&M5.EPD);
@@ -218,8 +214,11 @@ void loop() {
     }
 
     if( M5.BtnP.wasPressed()){
-        Serial.println("Btn P Pressed");
+          Serial.println("Btn P Pressed: オマケ。表紙描画");
+          canvas.fillCanvas(0);
 
+          canvas.drawJpgFile(SD, "/image.jpg");   // image.jpgがあれば表示
+          canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
     }
 
     if( M5.BtnR.wasPressed())
