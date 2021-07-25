@@ -12,8 +12,8 @@ int wc = 3;             // UTF-8の基本ワードバイト数
   int lst = 0;          // ページ上部空き
 
 
-long NextPagePoint=0; // 次のページ先頭ファイルポインタ
-long PrevPagePoint=0; // 前のページ先頭ファイルポインタ
+//long NextPagePoint=0; // 次のページ先頭ファイルポインタ
+//long PrevPagePoint=0; // 前のページ先頭ファイルポインタ
 
 
 M5EPD_Canvas canvas(&M5.EPD);
@@ -107,6 +107,8 @@ Serial.print("LF:");
 Serial.println( '\n', HEX);
 */
 
+  canvas.fillCanvas(0);
+
 //  Serial.println(buf.charAt(1)); 
 int i;
   for(i=0;i<l;i+=wc){
@@ -181,21 +183,36 @@ int i;
 
 void loop() {
 
-   String buf;
-  long pos=0;
+  long page_p[1000];   // ページポインタ：1000ページまで
 
+  String buf;
+  int this_page=0;  //現在ページ
 
-  buf = set_string(pos);
+  page_p[this_page]=0;
+
+  buf = set_string(page_p[this_page]);
   Serial.println(buf);
 
-  NextPagePoint = pageView(buf);
-  Serial.println(NextPagePoint);
+  //this_page+=1;
+  page_p[this_page+1] = pageView(buf);    // pageView の戻り値はそのページの末尾＋１
+  Serial.println(page_p[this_page+1]);
   
 
    while(1) {
 
     if( M5.BtnL.wasPressed()) { // Backは1度のみに・・Prevは配列にするしかないか・・・？
         Serial.println("Btn L Pressed");
+        if(this_page>0){
+
+            this_page-=1;
+
+            buf = set_string(page_p[this_page]);
+              
+            Serial.print("OldEndP:");          Serial.println(page_p[this_page+1]);  
+            long ll = pageView(buf);    // pageView の戻り値はそのページの末尾＋１
+            Serial.print("NewEndP:");          Serial.println(ll);
+           // page_p[this_page+1] = ll;
+        }
        
 
     }
@@ -210,10 +227,20 @@ void loop() {
         Serial.println("Btn R Pressed");
         Serial.println("NextPage!");
         canvas.fillCanvas(0);
+
+        this_page+=1;
+
+        buf = set_string(page_p[this_page]);
+        
+        page_p[this_page+1] = page_p[this_page] + pageView(buf);    // pageView の戻り値はそのページの末尾＋１
+        Serial.println(page_p[this_page+1]);
+
+        /*
         PrevPagePoint=NextPagePoint;
         buf = set_string(NextPagePoint);
         NextPagePoint += pageView(buf);
         Serial.println(NextPagePoint);
+        */
     }
     M5.update();
     delay(100);
