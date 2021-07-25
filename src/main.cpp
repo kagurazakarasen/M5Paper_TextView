@@ -1,7 +1,7 @@
 #include <M5EPD.h>
 #include <FS.h>
 
-#define DocTextFile "/doc2.txt"   // 読み込みテキストファイル（UTF-8）
+#define DocTextFile "/doc.txt"   // 読み込みテキストファイル（UTF-8）
 #define TtfFile "/font.ttf"   // フォントファイル（UTF-8）
 
 
