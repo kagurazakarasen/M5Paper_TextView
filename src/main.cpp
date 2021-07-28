@@ -36,7 +36,7 @@ void setup() {
   
   Serial.println("Loading done.");
   //canvas.createRender(96, 256);
-  canvas.createRender(32, 256);
+  canvas.createRender(pt, 256);
 
   canvas.setTextSize(pt); //フォントサイズ指定
 
@@ -53,6 +53,17 @@ void setup() {
   canvas.setTextSize(pt); //フォントサイズ指定
 
 
+}
+
+void test(){
+  //縦書き試験用サンプル
+  String buf = u8"諸行無常の響きあり。";
+  canvas.drawString(buf, 0, pt*9);
+  for(int i=0;i<10;i++){
+     canvas.drawString(buf.substring(i*3, i*3+wc), pt*9, i*pt);
+  }
+  canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
+  while(1){}
 }
 
 String set_string(long pp){
@@ -95,13 +106,6 @@ int pageView(String buf){
   
   int l =buf.length();
   Serial.println(l);
-
-/*
-Serial.print("CR:");
-Serial.println( '\r', HEX);
-Serial.print("LF:");
-Serial.println( '\n', HEX);
-*/
 
   canvas.fillCanvas(0);
 
@@ -179,6 +183,8 @@ int i;
 
 void loop() {
 
+  //test();
+
   long page_p[1000];   // ページポインタ：1000ページまで
 
   String buf;
@@ -234,12 +240,7 @@ void loop() {
         page_p[this_page+1] = page_p[this_page] + pageView(buf);    // pageView の戻り値はそのページの末尾＋１
         Serial.println(page_p[this_page+1]);
 
-        /*
-        PrevPagePoint=NextPagePoint;
-        buf = set_string(NextPagePoint);
-        NextPagePoint += pageView(buf);
-        Serial.println(NextPagePoint);
-        */
+
     }
     M5.update();
     delay(100);
