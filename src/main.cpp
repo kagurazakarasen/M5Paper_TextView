@@ -137,39 +137,48 @@ int i;
       }
     }
 
+    // UTF-8 Check https://seiai.ed.jp/sys/text/java/utf8table.html 参照
     //1バイトなら？
-    if(buf.charAt(i)>8 and buf.charAt(i)<128){
+    //if(buf.charAt(i)>8 and buf.charAt(i)<128){
+    if(buf.charAt(i)<0x80){
       canvas.drawChar(buf.charAt(i), lx, ly);
       Serial.print(buf.charAt(i));
        //i+=1;
        i -= 2 ;   // 3バイト幅なので、次ループ用に2バイト戻しておく
       //wc=1;
-    } else if (buf.charAt(i)<8) {  
+    } else if (buf.charAt(i)>0xC0 and  buf.charAt(i)<0xE0) {  
       // 2バイトなら。。（未テスト）
         canvas.drawString(buf.substring(i, i+2), lx, ly);
         Serial.print(buf.substring(i, i+2));
         i -= 1 ;     // 3バイト幅なので、次ループ用に1バイト戻しておく
         break;
-    } else  {
-        // ここに来るのは3バイト
+
+      } else  if (buf.charAt(i)>0xF0 and buf.charAt(i)>0xF7 ) {  
+        canvas.drawString(buf.substring(i, i+wc+1), lx, ly);  // 4バイト文字
+        i += 1 ; 
+      } else  if (buf.charAt(i)>0xF8 and buf.charAt(i)>0xFB ) {  
+        canvas.drawString(buf.substring(i, i+wc+2), lx, ly);  //５バイト文字
+        i += 2 ; 
+      } else  if (buf.charAt(i)>0xFC and buf.charAt(i)>0xFD ) {  
+        canvas.drawString(buf.substring(i, i+wc+3), lx, ly);  //6バイト文字
+        i += 3 ; 
+
+    } else  {   //  else if (buf.charAt(i)>0xE0 and buf.charAt(i)>0xF0 ) {  ※本来3バイト文字は 0xE0～0xF0が開始バイトのようだけれどそうでもない？？　ここでは上に該当するもの以外を3バイト文字として表示する。
+        // ここに来るのは3バイト 
         //Serial.print(buf.substring(i, i+wc));
 
-        // 。や、の処理。無理やり描画
+        //「 。」「、」「ー」の処理。無理やり描画
         if(buf.substring(i, i+wc).equals("。")){
-          canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
-        } else if (buf.substring(i, i+wc).equals("、")){
-          canvas.drawLine(lx+(pt/1.2), ly+(pt/4),lx+(pt/1.2)+4, ly+(pt/4)+4, 4, 15);
-        }  else if (buf.substring(i, i+wc).equals("ー")){
-          canvas.drawLine(lx+(pt/2), ly+(pt/4),lx+(pt/2), ly+(pt-(pt/4)), 3, 15);
-        } else {
-            canvas.drawString(buf.substring(i, i+wc), lx, ly);
+              canvas.drawCircle(lx+(pt/1.2), ly+(pt/4), 4, 15);
+            } else if (buf.substring(i, i+wc).equals("、")){
+              canvas.drawLine(lx+(pt/1.2), ly+(pt/4),lx+(pt/1.2)+4, ly+(pt/4)+4, 4, 15);
+            }  else if (buf.substring(i, i+wc).equals("ー")){
+              canvas.drawLine(lx+(pt/2), ly+(pt/4),lx+(pt/2), ly+(pt-(pt/4)), 3, 15);
+            } else {
+                canvas.drawString(buf.substring(i, i+wc), lx, ly);
         }
-
     }
-
-    
     ly += pt;
-  
   }
 
 
@@ -185,7 +194,7 @@ void loop() {
 
   //test();
 
-  long page_p[1000];   // ページポインタ：1000ページまで
+  long page_p[1000];   // ページポインタ：とりあえず1000ページまで
 
   String buf;
   int this_page=0;  //現在ページ
