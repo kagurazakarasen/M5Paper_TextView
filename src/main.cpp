@@ -189,10 +189,28 @@ int i;
 
 }
 
+void coverView(){
+      canvas.fillCanvas(0);
+      canvas.drawJpgFile(SD, "/image.jpg");   // image.jpgがあれば表示
+      canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
+
+      while(1){
+          if( M5.BtnR.wasPressed()){
+            M5.update();
+            break;
+          }
+          M5.update();
+          delay(100);       
+      }
+
+}
+
 
 void loop() {
 
   //test();
+
+  coverView();
 
   long page_p[1000];   // ページポインタ：とりあえず1000ページまで
 
@@ -211,7 +229,7 @@ void loop() {
 
    while(1) {
 
-    if( M5.BtnL.wasPressed()) { // Backは1度のみに・・Prevは配列にするしかないか・・・？
+    if( M5.BtnL.wasPressed()) { // Back
         Serial.println("Btn L Pressed");
         if(this_page>0){
 
@@ -230,10 +248,13 @@ void loop() {
 
     if( M5.BtnP.wasPressed()){
           Serial.println("Btn P Pressed: オマケ。表紙描画");
-          canvas.fillCanvas(0);
+          coverView();
+          this_page=0;
+          page_p[this_page]=0;
 
-          canvas.drawJpgFile(SD, "/image.jpg");   // image.jpgがあれば表示
-          canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
+          buf = set_string(page_p[this_page]);
+          page_p[this_page+1] = pageView(buf);    // pageView の戻り値はそのページの末尾＋１
+
     }
 
     if( M5.BtnR.wasPressed())
