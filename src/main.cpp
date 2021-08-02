@@ -59,16 +59,34 @@ void test(){
   //縦書き試験用サンプル
   String buf = u8"諸行無常の響きあり。";
   canvas.drawString(buf, 0, pt*9);
+  /*
   for(int i=0;i<10;i++){
      canvas.drawString(buf.substring(i*3, i*3+wc), pt*9, i*pt);
   }
+  */
+
+//void setTextArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+  canvas.setTextArea(pt*9, 0,pt, 11*pt);
+  /*
+    TL_DATUM = Top left
+    TC_DATUM = Top centre
+    TR_DATUM = Top right
+    ML_DATUM = Middle left
+    MC_DATUM = Middle centre
+    MR_DATUM = Middle right
+    BL_DATUM = Bottom left
+    BC_DATUM = Bottom centre
+    BR_DATUM = Bottom right
+  */
+  canvas.setTextDatum(TC_DATUM);  // 1文字づつでは関係なかった
+
+  canvas.print(buf);
+
   canvas.pushCanvas(0,0,UPDATE_MODE_GLD16);
   while(1){}
 }
 
 String set_string(long pp){
-
-  //String buf = u8"祗園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。";
 
     String buf;
     long fpn=0; // 読み込みバイト数ポインタ
@@ -208,7 +226,7 @@ void coverView(){
 
 void loop() {
 
-  //test();
+  test();
 
   coverView();
 
