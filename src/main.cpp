@@ -2,7 +2,8 @@
 #include <FS.h>
 
 #define DocTextFile "/doc.txt"   // 読み込みテキストファイル（UTF-8）
-#define TtfFile "/font.ttf"   // フォントファイル（UTF-8）
+#define TtfFile "/font.ttf"   // フォントファイル
+//#define TtfFile "/GenEiKoburiMin6-R.ttf"   // フォントファイル
 
 
 int gyoukan = 8;    // 行間
@@ -226,7 +227,7 @@ void coverView(){
 
 void loop() {
 
-  test();
+  //test();
 
   coverView();
 
